@@ -13,13 +13,17 @@
 - 📈 **12 项描述统计指标** — 均值、中位数、标准差、四分位数、偏度、峰度等自动计算
 - 🐍 **Python 代码生成** — 每种图表自动生成对应 Python 分析代码，一键复制
 - 🖼️ **图表导出** — 一键导出高清 PNG
-- 🔒 **完全本地运行** — 数据不上传，隐私安全，离线可用
+- 🔒 **数据本地处理** — 数据不上传，隐私安全
 - 📱 **响应式设计** — 适配桌面、平板、手机屏幕
 
 ## 🚀 快速开始
 
 ### 方式一：直接使用网页版（无需安装）
 直接打开 `src/renderer/index.html` 即可在浏览器中使用。
+
+> **离线使用说明**：默认通过 CDN 加载 ECharts 和 PapaParse 库。如需完全离线运行，请下载以下两个文件放到 `src/renderer/assets/` 目录，并修改 `index.html` 中的脚本引用路径：
+> - echarts.min.js: https://unpkg.com/echarts@5.4.3/dist/echarts.min.js
+> - papaparse.min.js: https://unpkg.com/papaparse@5.4.1/papaparse.min.js
 
 ### 方式二：本地开发（Electron 桌面端）
 ```bash
@@ -67,12 +71,10 @@ statsviz-pro/
 │       │   └── style.css
 │       ├── js/
 │       │   └── app.js
-│       └── assets/        # 静态资源（echarts、papaparse 等）
-│           ├── echarts.min.js
-│           └── papaparse.min.js
+│       └── assets/        # 静态资源目录（离线使用时存放第三方库）
 ├── build/                 # 打包图标等资源
 ├── docs/                  # 文档
-├── release/               # 打包输出目录
+├── release/              # 打包输出目录
 ├── package.json
 ├── LICENSE
 └── README.md
