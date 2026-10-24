@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StatsViz Pro - 专业数据统计与可视化平台</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="assets/echarts.min.js"></script>
+<script src="assets/papaparse.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <!-- 侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">📊</div>
+      <div class="logo-text">StatsViz<br><small>Pro v1.0</small></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <span class="nav-icon">🏠</span> 工作台
+      </div>
+      <div class="nav-item" data-page="data" onclick="showPage('data')">
+        <span class="nav-icon">📁</span> 数据管理
+      </div>
+      <div class="nav-item" data-page="stats" onclick="showPage('stats')">
+        <span class="nav-icon">📈</span> 统计分析
+      </div>
+      <div class="nav-item" data-page="chart" onclick="showPage('chart')">
+        <span class="nav-icon">📊</span> 图表生成
+      </div>
+      <div class="nav-item" data-page="code" onclick="showPage('code')">
+        <span class="nav-icon">🐍</span> 代码生成
+      </div>
+      <div class="nav-item" data-page="about" onclick="showPage('about')">
+        <span class="nav-icon">ℹ️</span> 关于
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar">U</div>
+        <div>本地用户<br><small>离线模式</small></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main">
+    <!-- 顶栏 -->
+    <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="breadcrumb" id="breadcrumb">工作台</div>
+      <div class="topbar-actions">
+        <button class="btn btn-sm" onclick="exportChart()">导出图表</button>
+        <button class="btn btn-sm btn-primary" onclick="copyCode()">复制代码</button>
+      </div>
+    </div>
+
+    <!-- 页面内容 -->
+    <div class="content">
+      <!-- 工作台 -->
+      <div class="page active" id="page-dashboard">
+        <div class="welcome-card">
+          <h1>👋 欢迎使用 StatsViz Pro</h1>
+          <p>专业的跨平台本地数据统计与可视化分析工具，上传 CSV 即可开始分析</p>
+          <div class="quick-stats">
+            <div class="quick-stat"><div class="num">8+</div><div class="label">图表类型</div></div>
+            <div class="quick-stat"><div class="num">12</div><div class="label">统计指标</div></div>
+            <div class="quick-stat"><div class="num">100%</div><div class="label">本地运行</div></div>
+            <div class="quick-stat"><div class="num">3</div><div class="label">桌面平台</div></div>
+          </div>
+        </div>
+        <div class="card-grid">
+          <div class="card" onclick="showPage('data')">
+            <div class="card-icon">📂</div>
+            <h3>上传数据</h3>
+            <p>拖拽或点击上传 CSV 文件，自动识别数据类型</p>
+          </div>
+          <div class="card" onclick="showPage('chart')">
+            <div class="card-icon">📊</div>
+            <h3>生成图表</h3>
+            <p>选择列和图表类型，一键生成专业统计图表</p>
+          </div>
+          <div class="card" onclick="showPage('stats')">
+            <div class="card-icon">📈</div>
+            <h3>统计分析</h3>
+            <p>自动计算描述统计量、偏度、峰度等指标</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据管理 -->
+      <div class="page" id="page-data">
+        <h2>📁 数据管理</h2>
+        <div class="upload-zone" id="uploadZone">
+          <div class="icon">📂</div>
+          <h3>拖拽 CSV 文件到此处，或点击上传</h3>
+          <p>支持 .csv 格式，第一行为列名</p>
+        </div>
+        <input type="file" id="fileInput" accept=".csv" style="display:none">
+        <div id="dataInfo" style="display:none">
+          <div class="info-bar">
+            <span id="dataFileName"></span>
+            <span id="dataRows"></span>
+            <span id="dataCols"></span>
+          </div>
+          <div class="data-table-wrap">
+            <table id="dataTable"></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 统计分析 -->
+      <div class="page" id="page-stats">
+        <h2>📈 统计分析</h2>
+        <div class="row">
+          <div class="col-4">
+            <div class="card">
+              <h3>选择列</h3>
+              <div class="col-list" id="statColList"></div>
+            </div>
+          </div>
+          <div class="col-8">
+            <div class="card">
+              <h3 id="statColName">统计结果</h3>
+              <div class="stat-grid" id="statGrid">
+                <p style="color:#999">请先上传数据并选择一列</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图表生成 -->
+      <div class="page" id="page-chart">
+        <h2>📊 图表生成</h2>
+        <div class="chart-toolbar">
+          <select id="chartTypeSel">
+            <option value="histogram">直方图</option>
+            <option value="boxplot">箱线图</option>
+            <option value="scatter">散点图</option>
+            <option value="line">折线图</option>
+            <option value="bar">条形图</option>
+            <option value="pie">饼图</option>
+            <option value="kde">KDE密度图</option>
+            <option value="heatmap">相关性热力图</option>
+          </select>
+          <select id="chartColSel"></select>
+          <button class="btn btn-primary" onclick="renderChart()">生成图表</button>
+        </div>
+        <div class="chart-card">
+          <div id="chart"></div>
+        </div>
+      </div>
+
+      <!-- 代码生成 -->
+      <div class="page" id="page-code">
+        <h2>🐍 Python 代码生成</h2>
+        <p style="color:#666;margin-bottom:16px">根据你选择的图表类型，自动生成可直接运行的 Python 代码</p>
+        <div class="code-toolbar">
+          <select id="codeChartType">
+            <option value="histogram">直方图</option>
+            <option value="boxplot">箱线图</option>
+            <option value="scatter">散点图</option>
+            <option value="line">折线图</option>
+            <option value="bar">条形图</option>
+            <option value="pie">饼图</option>
+            <option value="kde">KDE密度图</option>
+            <option value="heatmap">相关性热力图</option>
+          </select>
+          <button class="btn btn-primary" onclick="generateCode()">生成代码</button>
+          <button class="btn" onclick="copyCode()">复制代码</button>
+        </div>
+        <div class="code-block" id="codeBlock"># 选择图表类型后自动生成代码</div>
+      </div>
+
+      <!-- 关于 -->
+      <div class="page" id="page-about">
+        <h2>ℹ️ 关于 StatsViz Pro</h2>
+        <div class="card">
+          <h3>StatsViz Pro v1.0.0</h3>
+          <p>专业的跨平台数据统计与可视化分析平台</p>
+          <hr>
+          <p><strong>支持平台：</strong></p>
+          <ul>
+            <li>✅ Windows 10/11 (NSIS 安装包 + 便携版)</li>
+            <li>✅ macOS 10.15+ (DMG 安装包)</li>
+            <li>✅ Linux (deb + AppImage)</li>
+            <li>✅ 任何现代浏览器 (Chrome/Firefox/Edge/Safari)</li>
+            <li>✅ 移动端浏览器响应式适配</li>
+          </ul>
+          <p style="margin-top:16px"><strong>功能特性：</strong></p>
+          <ul>
+            <li>✅ 完全本地运行，数据不上传，隐私安全</li>
+            <li>✅ 支持 8 种常用统计图表</li>
+            <li>✅ 自动计算 12 项描述统计指标</li>
+            <li>✅ 一键生成 Python 分析代码</li>
+            <li>✅ 图表一键导出高清 PNG</li>
+          </ul>
+          <p style="margin-top:16px;color:#666">技术栈：Electron + HTML/CSS/JavaScript + ECharts</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
